@@ -43,12 +43,12 @@ function serverStartAndStop() {
         await sleep(1000); //Making sure that the port is closed
 
         exec('sudo systemctl start SMPServer', ()=> console.log("SystemCTL start initiated"));
-        await sleep(300000); //Give the server 5 minutes to start
+        await sleep(180000); //Give the server 3 minutes to start
 
         lastActive = new Date();
         pingServerUntilInactivity().finally(async function() {
             exec('sudo systemctl stop SMPServer', ()=> console.log("SystemCTL stop initiated"));
-            await sleep(300000); //Give the server 5 minutes to stop
+            await sleep(180000); //Give the server 3 minutes to stop
             firstTime = true;
             inactive = false;
             lastActive = null;
@@ -70,7 +70,6 @@ function pingServerUntilInactivity(){
                 console.log(new Date().valueOf() - lastActive.valueOf());
                 if(new Date().valueOf() - lastActive.valueOf() >= 600000){
                     resolve("inactive");
-                    return;
                 }
             }else{
                 inactive = false;
