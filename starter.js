@@ -1,9 +1,12 @@
 let minecraft = require('minecraft-protocol/src/index');
-
 let exec = require('child_process').exec;
 
 let host = "jamiestivala.com";
 let port = 25565;
+let scriptName = "SMPServer";
+
+let firstTime = true;
+let lastActive = null;
 
 function waitForLogin() {
     return new Promise(function (resolve) {
@@ -38,9 +41,6 @@ function sleep(ms) {
         setTimeout(resolve, ms)
     })
 }
-
-let firstTime = true;
-let lastActive = null;
 
 function pingServerUntilInactivity(host, port) {
     return new Promise((resolve) => {
@@ -78,19 +78,19 @@ function pingWrapper(host, port) {
     })
 }
 
-function serverStartAndStop() {
+function serverStartAndStop(host, port) {
     console.log("\n\nAwaiting for login\n\n");
     waitForLogin().then(async () => {
         console.log("User logged in.  Now starting the server");
         await sleep(1000); //Making sure that the port is closed
 
-        exec('sudo systemctl start SMPServer', () => console.log("SystemCTL start initiated"));
+        exec('sudo systemctl start ' + scriptName, () => console.log("SystemCTL start initiated"));
         await sleep(120000);  //Give the server 2 minutes to stop
 
         lastActive = new Date();
         pingServerUntilInactivity(host, port).finally(async function () {
             console.log("Server inactive.  Going back to waiting stage");
-            exec('sudo systemctl stop SMPServer', () => console.log("SystemCTL stop initiated"));
+            exec('sudo systemctl stop ' + scriptName, () => console.log("SystemCTL stop initiated"));
             await sleep(120000); //Give the server 2 minutes to stop
             firstTime = true;
             lastActive = null;
@@ -99,4 +99,4 @@ function serverStartAndStop() {
     });
 }
 
-serverStartAndStop();
+serverStartAndStop(host, port);
