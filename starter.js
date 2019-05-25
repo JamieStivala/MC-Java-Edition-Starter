@@ -43,7 +43,6 @@ let firstTime = true;
 let lastActive = null;
 
 function pingServerUntilInactivity(host, port) {
-    console.log("hit test");
     return new Promise((resolve) => {
         pingWrapper(host, port).then(async (result) => {
             firstTime = false;
