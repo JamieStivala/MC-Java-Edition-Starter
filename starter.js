@@ -43,10 +43,10 @@ function serverStartAndStop() {
         await sleep(1000); //Making sure that the port is closed
 
         exec('sudo systemctl start SMPServer', ()=> console.log("SystemCTL start initiated"));
-        await sleep(180000); //Give the server 3 minutes to start
+        await sleep(180000);
 
         lastActive = new Date();
-        pingServerUntilInactivity().finally(async function() {
+        pingServerUntilInactivity().then(async function() {
             exec('sudo systemctl stop SMPServer', ()=> console.log("SystemCTL stop initiated"));
             await sleep(180000); //Give the server 3 minutes to stop
             firstTime = true;
@@ -62,34 +62,39 @@ let inactive = false;
 let lastActive = null;
 
 function pingServerUntilInactivity(){
-    return new Promise(async function (resolve, reject) {
-        ping("jamiestivala.com", 25565).then(async function (result){
-            firstTime = false;
-            if(result.players.online === 0){
-                inactive = true;
-                console.log(new Date().valueOf() - lastActive.valueOf());
-                if(new Date().valueOf() - lastActive.valueOf() >= 600000){
-                    resolve("inactive");
+    return new Promise(async (resolve) => {
+        recursionPing("jamiestivala.com", 25565);
+
+        function recursionPing(host, port){
+            pingWrapper(host, port).then(async (result) => {
+                firstTime = false;
+
+                if(result.players.online === 0){
+                    inactive = true;
+                    if(new Date().valueOf() - lastActive.valueOf() >= 60000){ //TODO after testing rollback to 10 minutes
+                        console.log("server down");
+                        resolve(true);
+                    }else{
+                        inactive = false;
+                        lastActive = new Date();
+                    }
                 }
-            }else{
-                inactive = false;
-                lastActive = new Date();
-            }
-            await sleep(10000);
-            pingServerUntilInactivity();
-        }).catch(async function (reject) {
-            console.log(reject);
-            if(firstTime) {
                 await sleep(10000);
-                pingServerUntilInactivity();
-            }else{
-                reject("down");
-            }
-        })
+                recursionPing(host, port);
+            }).catch(async (error) => {
+                if(firstTime){
+                    await sleep(10000);
+                    recursionPing(host, port);
+                }else{
+                    console.log("Server down or " + error);
+                    resolve (false);
+                }
+            })
+        }
     });
 }
 
-function ping(host, port){
+function pingWrapper(host, port){
     return new Promise((resolve, reject) => {
         minecraft.ping({host: host, port: port}, (error, result) => {
             if(error) reject(error);
