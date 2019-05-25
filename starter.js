@@ -36,27 +36,6 @@ function sleep(ms){
     })
 }
 
-function serverStartAndStop() {
-    console.log("\n\nAwaiting for login\n\n");
-    waitForLogin().then(async () => {
-        console.log("User logged in.  Now starting the server");
-        await sleep(1000); //Making sure that the port is closed
-
-        exec('sudo systemctl start SMPServer', ()=> console.log("SystemCTL start initiated"));
-        await sleep(180000);
-
-        lastActive = new Date();
-        pingServerUntilInactivity().then(async function() {
-            exec('sudo systemctl stop SMPServer', ()=> console.log("SystemCTL stop initiated"));
-            await sleep(180000); //Give the server 3 minutes to stop
-            firstTime = true;
-            inactive = false;
-            lastActive = null;
-            serverStartAndStop();
-        })
-    });
-}
-
 let firstTime = true;
 let inactive = false;
 let lastActive = null;
@@ -71,7 +50,7 @@ function pingServerUntilInactivity(){
 
                 if(result.players.online === 0){
                     inactive = true;
-                    if(new Date().valueOf() - lastActive.valueOf() >= 60000){ //TODO after testing rollback to 10 minutes
+                    if(new Date().valueOf() - lastActive.valueOf() >= 600000){ //After 10 minutes of inactivity
                         console.log("server down");
                         resolve(true);
                     }else{
@@ -101,6 +80,28 @@ function pingWrapper(host, port){
             else resolve(result);
         });
     })
+}
+
+function serverStartAndStop() {
+    console.log("\n\nAwaiting for login\n\n");
+    waitForLogin().then(async () => {
+        console.log("User logged in.  Now starting the server");
+        await sleep(1000); //Making sure that the port is closed
+
+        exec('sudo systemctl start SMPServer', ()=> console.log("SystemCTL start initiated"));
+        await sleep(120000);  //Give the server 2 minutes to stop
+
+        lastActive = new Date();
+        pingServerUntilInactivity().finally(async function() {
+            console.log("Server inactive.  Going back to waiting stage");
+            exec('sudo systemctl stop SMPServer', ()=> console.log("SystemCTL stop initiated"));
+            await sleep(120000); //Give the server 2 minutes to stop
+            firstTime = true;
+            inactive = false;
+            lastActive = null;
+            serverStartAndStop();
+        })
+    });
 }
 
 serverStartAndStop();
