@@ -50,7 +50,7 @@ function pingServerUntilInactivity(host, port) {
             if (result.players.online === 0 && new Date().valueOf() - lastActive.valueOf() >= 600000) { //After 10 minutes of inactivity
                 console.log("Server Inactive\nStarting stop sequence");
                 resolve();
-            } else {
+            } else if(result.players.online !== 0){
                 lastActive = new Date();
             }
             await sleep(10000);
