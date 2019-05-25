@@ -1,0 +1,15 @@
+[Unit]
+Description=Minecraft Server Starter - Custom Script
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/minecraft/SMP/starter
+
+User=minecraft
+Group=minecraft
+
+Restart=no
+ExecStart=/usr/bin/screen -DmS SMPStarter /usr/bin/node starter.js
+
+[Install]
+WantedBy=multi-user.target
