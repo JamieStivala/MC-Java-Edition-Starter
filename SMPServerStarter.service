@@ -8,7 +8,7 @@ WorkingDirectory=/opt/minecraft/SMP/starter
 User=minecraft
 Group=minecraft
 
-Restart=no
+Restart=always
 ExecStart=/usr/bin/screen -DmS SMPStarter /usr/bin/node starter.js
 
 [Install]
