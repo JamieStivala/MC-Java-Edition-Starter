@@ -21,8 +21,6 @@ async function checkActivity(lastActive : Date, serverStarted : boolean) : Promi
     await sleep(3000);
     let active = await isServerActive();
 
-    console.log((new Date().getTime()) - lastActive.getTime());
-
     if(active) return checkActivity(new Date(), true);
     else if(!active && !serverStarted) return checkActivity(new Date(), serverStarted);
     else if(!active && serverStarted && (new Date().getTime()) - lastActive.getTime() < config.timeout) return checkActivity(lastActive, serverStarted);
