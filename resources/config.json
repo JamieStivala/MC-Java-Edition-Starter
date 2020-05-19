@@ -1,6 +1,0 @@
-{
-    "port": 25565,
-    "host": "smp.jamiestivala.com",
-    "timeout": 300000,
-    "systemctlService": "SampleStarter.service"
-}

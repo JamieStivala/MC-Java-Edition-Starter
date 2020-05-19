@@ -9,7 +9,7 @@ User=minecraft
 Group=minecraft
 
 Restart=always
-ExecStart=/usr/bin/screen -DmS SMPStarter /usr/bin/node starter.js
+ExecStart=/usr/bin/screen -DmS SMPStarter /usr/bin/node starter.js example.com 25565 CTLService.service 300000
 
 [Install]
 WantedBy=multi-user.target
