@@ -4,7 +4,7 @@ import * as config from "../resources/config.json";
 
 const promisePing = promisify(mc.ping)
 export async function isServerActive() : Promise <boolean>{
-    return promisePing({host: config.host}).then((result : mc.NewPingResult) => {return result.players.online > 0;}).catch(error => {return false});
+    return promisePing({host: config.host}).then((result : mc.NewPingResult) => {return result.players.online > 0;}).catch(() => {return false});
 }
 
 export function sleep(ms: number) {
