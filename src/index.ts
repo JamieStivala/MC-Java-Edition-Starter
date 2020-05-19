@@ -23,7 +23,7 @@ function awaitLogin() : Promise <void> {
 }
 
 async function checkActivity(lastActive : Date, serverStarted : boolean) : Promise<void>{
-    await sleep(3000);
+    await sleep(1000);
     let active = await isServerActive(host);
 
     if(active) return checkActivity(new Date(), true);
